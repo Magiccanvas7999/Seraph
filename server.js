@@ -4,15 +4,23 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-// 1. Explicitly protect server files from being downloaded
+// 1. Health Check Endpoint (Used by Fly.io, Oracle, or AWS to monitor container status)
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'UP',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// 2. Explicitly protect server files from being downloaded
 app.get(['/server.js', '/package.json', '/package-lock.json', '/Dockerfile', '/.dockerignore', '/fly.toml'], (req, res) => {
     res.status(404).send('Not Found');
 });
 
-// 2. Serve static files directly from the root directory
+// 3. Serve static files directly from the root directory
 app.use(express.static(__dirname));
 
-// 3. Catch-all: Direct all other URL paths to index.html
+// 4. Catch-all: Direct all other URL paths to index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
